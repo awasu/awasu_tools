@@ -1,0 +1,3 @@
+include awasu_tools/*.py
+include README.rst
+include MANIFEST.in

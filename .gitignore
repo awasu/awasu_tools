@@ -1,3 +1,6 @@
+MANIFEST
+READ-ME.TXT
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
