@@ -1,4 +1,4 @@
-Copyright (c) Awasu Pty. Ltd. 2015 (all rights reserved).
+Copyright (c) Awasu Pty. Ltd. 2015-20 (all rights reserved).
 Unauthorized use of this code is prohibited.
 
 This software is provided 'as-is', without any express or implied warranty. In no event will the author be held liable for any damages arising from the use of this software.

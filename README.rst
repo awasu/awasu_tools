@@ -2,7 +2,7 @@
 Awasu Tools
 ===========
 
-``awasu_tools`` is a set of classes and utilities to help write `Awasu <http://awasu.com>`_ extensions.
+``awasu_tools`` is a set of classes and utilities to help write `Awasu <https://awasu.com>`_ extensions.
 
 The main features are:
 
@@ -10,4 +10,4 @@ The main features are:
 - ``ConfigFile``, for reading Awasu INI files.
 - logging services.
 
-A tutorial is available `here <http://www.awasu.com/weblog/writing-extensions/>`_.
+A tutorial is available `here <https://awasu.com/weblog/writing-extensions/>`_.
