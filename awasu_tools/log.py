@@ -1,6 +1,6 @@
 """ Logging services. """
 
-# COPYRIGHT:   (c) Awasu Pty. Ltd. 2015-2020 (all rights reserved).
+# COPYRIGHT:   (c) Awasu Pty. Ltd. 2015 (all rights reserved).
 #              Unauthorized use of this code is prohibited.
 #
 # LICENSE:     This software is provided 'as-is', without any express
@@ -37,11 +37,11 @@ def log_msg( msg, *args, **kwargs ):
     """Log a message."""
     if not _log_file:
         return
+    # log the message
     if msg == "":
         _log_file.write( "\n" )
         return
-    # log the message
-    _log_file.write( "{} | ".format( time.strftime("%Y-%m-%d %H:%M:%S") ) )
+    _log_file.write( "{} | ".format( time.strftime( "%Y-%m-%d %H:%M:%S" ) ) )
     _log_file.write( msg.format( *args, **kwargs ) )
     _log_file.write( "\n" )
     _log_file.flush()
@@ -52,6 +52,7 @@ def log_raw_msg( msg ):
     """Log a raw message."""
     if not _log_file:
         return
+    # log the message
     _log_file.write( msg )
     if not msg.endswith( "\n" ):
         _log_file.write( "\n" )
@@ -70,4 +71,4 @@ def init_logging( log_filename ):
         _log_file.write( "\n\n\n=== NEW SESSION ===\n" )
     else:
         # start a new log file
-        _log_file = open( log_filename, "w", encoding="utf-8" )
+        _log_file = open( log_filename, "w", encoding="utf-8" ) #pylint: disable=consider-using-with

@@ -1,6 +1,6 @@
 """ Provide access to an Awasu config file. """
 
-# COPYRIGHT:   (c) Awasu Pty. Ltd. 2015-2020 (all rights reserved).
+# COPYRIGHT:   (c) Awasu Pty. Ltd. 2015 (all rights reserved).
 #              Unauthorized use of this code is prohibited.
 #
 # LICENSE:     This software is provided 'as-is', without any express
@@ -51,7 +51,7 @@ class ConfigFile:
             with open( src, "r", encoding="utf-8" ) as fp:
                 buf = fp.read()
             self.filename = src
-        elif type(src) is bytes:
+        elif isinstance( src, bytes ):
             buf = src.decode( "utf-8" )
             self.filename = None
         else:
@@ -78,7 +78,7 @@ class ConfigFile:
             mo = re.search( r"([^[=]+)\s*=", line_buf )
             if mo and curr_section_name:
                 # found a new key/value pair
-                key = mo.group(1).strip().lower()
+                key = mo.group( 1 ).strip().lower()
                 val = line_buf[ mo.end(0) : ].strip()
                 self.sections[ curr_section_name ][ key ] = val
 
@@ -98,8 +98,8 @@ class ConfigFile:
             default = ( "", ConfigFile.TVT_UNKNOWN )
         else:
             assert len(default) == 2
-            assert type( default[0] ) is str
-            assert type( default[1] ) is int
+            assert isinstance( default[0], str )
+            assert isinstance( default[1], int )
         val, text_type = self.__get_val( section, key, default[0] )
         if text_type is None:
             text_type = default[1]
@@ -109,7 +109,7 @@ class ConfigFile:
     def get_string_list( self, section, default=None ):
         """Return a list of string values."""
         vals = []
-        for i in range(1,sys.maxsize):
+        for i in range( 1, sys.maxsize ):
             val, text_type = self.__get_val( section, str(i), "" )
             assert text_type is None
             if not val:
@@ -138,17 +138,17 @@ class ConfigFile:
 
     def get_int( self, section, key, default=0 ):
         """Return an integer config value."""
-        val, text_type = self.__get_val( section, key, default )
+        val, _ = self.__get_val( section, key, default )
         return int( val )
 
     def get_bool( self, section, key, default=False ):
         """Return a boolean config value."""
-        val, text_type = self.__get_val( section, key, default )
-        if val.lower() in ["1","true","yes","on","enable","enabled"]:
+        val, _ = self.__get_val( section, key, default )
+        if val.lower() in [ "1", "true", "yes", "on", "enable", "enabled" ]:
             return True
-        if val.lower() in ["0","false","no","off","disable","disabled"]:
+        if val.lower() in [ "0", "false", "no", "off", "disable", "disabled" ]:
             return False
-        raise ValueError( "Invalid boolean: "+val )
+        raise ValueError( "Invalid boolean: " + val )
 
     def __get_val( self, section, key, default ):
         """Return a raw config value.
@@ -175,17 +175,19 @@ class ConfigFile:
 
     def dump( self, out=sys.stdout ):
         """Dump the ConfigFile."""
-        for section,keyvals in self.sections.items():
-            print( "[{}]".format(section), file=out )
-            for key,val in keyvals.items():
+        for section, keyvals in self.sections.items():
+            print( "[{}]".format( section ), file=out )
+            for key, val in keyvals.items():
                 print( "{} = {}".format( key, val ), file=out )
             print( file=out )
 
 # ---------------------------------------------------------------------
 
 class ConfigFileTestCase( unittest.TestCase ):
+    """Test this module."""
 
     def test_get_val( self ):
+        """Test getting values from a ConfigFile."""
 
         # initialize
         config_file = ConfigFile( b"""
@@ -280,6 +282,7 @@ Empty=%0A*0
         )
 
     def test_unicode( self ):
+        """Test handling of Unicode content."""
 
         # initialize
         config_file = ConfigFile( b"""
@@ -299,10 +302,10 @@ japan = \xE6\x97\xA5\xE6\x9C\xAC
 # ---------------------------------------------------------------------
 
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
+    if len( sys.argv ) == 1:
         # run the unit tests
         unittest.main()
     else:
         # load and dump the specified config file
-        config_file = ConfigFile( sys.argv[1] )
-        config_file.dump()
+        _config_file = ConfigFile( sys.argv[1] )
+        _config_file.dump()

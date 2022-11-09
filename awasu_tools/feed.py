@@ -1,6 +1,6 @@
 """ Classes for generating feeds. """
 
-# COPYRIGHT:   (c) Awasu Pty. Ltd. 2015-2020 (all rights reserved).
+# COPYRIGHT:   (c) Awasu Pty. Ltd. 2015 (all rights reserved).
 #              Unauthorized use of this code is prohibited.
 #
 # LICENSE:     This software is provided 'as-is', without any express
@@ -53,7 +53,7 @@ class Feed:
         """Generate the feed XML."""
         # initialize
         if templ:
-            assert type(templ) is str
+            assert isinstance( templ, str )
         else:
             # use the default template
             templ = """<?xml version="1.0" encoding="UTF-8"?>""" "\n" \
@@ -73,7 +73,7 @@ class Feed:
             "image_url": self.image_url,
             "updated_time": _format_time( self.updated_time ),
         }
-        if self.image_url and not self.image_url.startswith(("http://","https://","file://")):
+        if self.image_url and not self.image_url.startswith( ( "http://", "https://", "file://" ) ):
             # NOTE: We assume image_url has been set to point to a file in our directory.
             ### IMPORTANT CAVEAT ###
             # If the channel image is accessed as a local file, it won't show properly
@@ -88,8 +88,13 @@ class Feed:
             args["image_url"] = "file:///" + os.path.join( dname, self.image_url )
         if self.extra_args:
             args.update( self.extra_args )
-        args = { k: safe_xml(v) if v is not None else "" for k,v in args.items() }
-        args["feed_items"] = "\n".join( [ fi.get_xml(log) for fi in self.feed_items ] )
+        args = {
+            k: safe_xml( v ) if v is not None else ""
+            for k, v in args.items()
+        }
+        args["feed_items"] = "\n".join(
+            fi.get_xml(log) for fi in self.feed_items
+        )
         if not self.feed_items:
             # tidy up the output if there are no feed items
             pos = templ.find( "{feed_items}\n" )
@@ -115,7 +120,7 @@ class FeedItem:
         """Generate the feed item XML."""
         # initialize
         if self.templ:
-            assert type(self.templ) is str
+            assert isinstance( self.templ, str )
             templ = self.templ
         else:
             # use the default template
@@ -137,10 +142,13 @@ class FeedItem:
         if log:
             log_msg( "" )
             log_msg( "Generating feed item..." )
-            for key,val in args.items():
+            for key, val in args.items():
                 log_msg( "- {} = {}", key, "" if val is None else val )
         # generate the feed item XML
-        args = { k: safe_xml(v) if v is not None else "" for k,v in args.items() }
+        args = {
+            k: safe_xml( v ) if v is not None else ""
+            for k, v in args.items()
+        }
         buf = templ.format( **args )
         if log:
             log_msg( "Generated feed item XML:" )
@@ -151,8 +159,8 @@ class FeedItem:
 
 def _format_time( val ):
     """Format a time value for insertion into a feed."""
-    if type(val) is float:
-        return time.strftime( "%Y-%m-%dT%H:%M:%SZ", time.gmtime(val) )
+    if isinstance( val, float ):
+        return time.strftime( "%Y-%m-%dT%H:%M:%SZ", time.gmtime( val ) )
     else:
         return val
 

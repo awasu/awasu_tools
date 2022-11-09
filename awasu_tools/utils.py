@@ -1,6 +1,6 @@
 """ Helper functions. """
 
-# COPYRIGHT:   (c) Awasu Pty. Ltd. 2015-2020 (all rights reserved).
+# COPYRIGHT:   (c) Awasu Pty. Ltd. 2015 (all rights reserved).
 #              Unauthorized use of this code is prohibited.
 #
 # LICENSE:     This software is provided 'as-is', without any express
@@ -28,6 +28,7 @@
 #                source distribution.
 
 import sys
+import os
 import re
 import time
 import datetime
@@ -42,7 +43,7 @@ def safe_xml( val ):
     """Convert a value into something that's safe to insert into XML."""
     if val is None:
         return ""
-    if type(val) is bytes:
+    if isinstance( val, bytes ):
         val = val.encode( "utf-8" )
     else:
         val = str( val )
@@ -61,7 +62,7 @@ def pretty_xml( val ):
         lines = buf.split( "\n" )
         if lines[0] == "<?xml version=\"1.0\" ?>":
             del lines[0]
-        return "\n".join( [ x for x in lines if x.strip() ] )
+        return "\n".join( x for x in lines if x.strip() )
     except xml.parsers.expat.ExpatError:
         # NOTE: If the XML is invalid, we just return it verbatim.
         return "*** WARNING: Invalid XML ***\n" + val
@@ -80,7 +81,7 @@ def parse_rfc2822_timestamp( tstamp ):
     if not mo:
         return None # nb: we sometimes get weird rubbish :-/
     date = int( mo.group() )
-    tstamp = tstamp[mo.end()+1:]
+    tstamp = tstamp[ mo.end()+1 : ]
 
     # parse the rest of the timestamp
     #   0----5----0----5----0----5
@@ -99,8 +100,8 @@ def parse_rfc2822_timestamp( tstamp ):
     tstamp2 = datetime.datetime( year, month, date, hours, minutes, seconds )
 
     # adjust for the time zone
-    if tstamp[18] in ("+","-"):
-        tz_delta = 60 * int(tstamp[19:21]) + int(tstamp[21:23])
+    if tstamp[18] in ( "+", "-" ):
+        tz_delta = 60 * int( tstamp[19:21] ) + int( tstamp[21:23] )
         tz_delta *= -1 if tstamp[18] == "+" else +1
         tstamp2 += datetime.timedelta( seconds=60*tz_delta )
 
@@ -110,7 +111,7 @@ def parse_rfc2822_timestamp( tstamp ):
 
 def make_iso8601_timestamp( tstamp ):
     """Return an ISO 8601 timestamp (for Atom feeds)."""
-    if type(tstamp) is int:
+    if isinstance( tstamp, int ):
         tstamp = time.gmtime( tstamp )
     return "{year:4d}-{month:02d}-{date:02d}T{hours:02d}:{minutes:02d}:{seconds:02d}Z".format(
         year = tstamp.tm_year,
@@ -138,27 +139,47 @@ def dump_bytes( buf, caption="", prefix="", out=sys.stdout ):
     if caption:
         print( caption, file=out ) # nb: no line prefix
     # dump the value as bytes
-    for line_no in range( 0, int((len(buf)+15)/16) ):
+    for line_no in range( 0, int( (len(buf)+15) / 16 ) ):
         print( "{}{:04x}: ".format( prefix, 16*line_no ), end="", file=out )
         row_bytes = buf[ 16*line_no : 16*line_no+16 ]
-        line_buf = " ".join( [ "{:02x}".format(ord(ch)) for ch in row_bytes ] )
-        if len(line_buf) > 23: # nb: 23 = 8 hex values (2 digits each), plus 7 separators
+        line_buf = " ".join(
+            "{:02x}".format( ord(ch) )
+            for ch in row_bytes
+        )
+        if len( line_buf ) > 23: # nb: 23 = 8 hex values (2 digits each), plus 7 separators
             line_buf = "{} {}".format( line_buf[:23], line_buf[23:] )
-        line_buf += " "*(48-len(line_buf))
+        line_buf += " " * (48 - len(line_buf))
         print( line_buf, end="", file=out )
         print(
-            " | " + "".join( [ ch if 32 <= ord(ch) < 127 else "." for ch in row_bytes ] ),
+            " | " + "".join(
+                ch if 32 <= ord(ch) < 127 else "."
+                for ch in row_bytes
+            ),
             file=out
         )
 
 # ---------------------------------------------------------------------
 
+def change_extn( fname , extn ) :
+    """Change the extension of a filename."""
+    # NOTE: This is used by dirmon3 in the tutorial.
+    dname , fname = os.path.split( fname )
+    fname = ( "{}{}" if extn.startswith( "." ) else "{}.{}" ).format(
+        os.path.splitext(fname)[0] , extn
+    )
+    return os.path.join( dname , fname )
+
+# ---------------------------------------------------------------------
+
 class UtilsTestCase( unittest.TestCase ):
+    """Test the functions in this module."""
 
     def test_safe_xml( self ):
+        """Test making strings safe for inclusion in XML."""
         self.assertEqual( safe_xml('foo="<bar>"'), "foo=&quot;&lt;bar&gt;&quot;" )
 
     def test_rfc2822_timestamps( self ):
+        """Test parsing RFC 2822 timestamps."""
         self.assertEqual( parse_rfc2822_timestamp( "Tue, 01 Apr 2014 12:02:03 +0400" ),
             1396339323
         )
@@ -170,6 +191,7 @@ class UtilsTestCase( unittest.TestCase ):
         )
 
     def test_iso8601_timestamp( self ):
+        """Test creating ISO 8601 timestamps."""
         self.assertEqual(
             make_iso8601_timestamp( time.struct_time( ( 2001, 2, 3, 4, 5, 6, 0,1,0 ) ) ),
             "2001-02-03T04:05:06Z"
